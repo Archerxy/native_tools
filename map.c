@@ -102,12 +102,14 @@ static void map_node_insert_fixup(Map *map, MapNode *node) {
         gparent = parent->parent;
         if (parent == gparent->left) {
             MapNode *uncle = gparent->right;
+            // Case 1条件：叔叔节点是红色
             if (uncle && uncle->color == RED) {
                 uncle->color = BLACK;
                 parent->color = BLACK;
                 gparent->color = RED;
                 node = gparent;
             } else {
+                // Case 2条件：叔叔是黑色，且当前节点是右孩子
                 if (parent->right == node) {
                     map_node_left_rotate(map, parent);
                     MapNode *tmp = parent;
@@ -115,12 +117,14 @@ static void map_node_insert_fixup(Map *map, MapNode *node) {
                     node = tmp;
                 }
 
+                // Case 3条件：叔叔是黑色，且当前节点是左孩子。
                 parent->color = BLACK;
                 gparent->color = RED;
                 map_node_right_rotate(map, gparent);
             }
-        } else {
+        } else { //若父节点是右孩子
             MapNode *uncle = gparent->left;
+            // Case 1条件：叔叔节点是红色
             if (uncle && uncle->color == RED) {
                 uncle->color = BLACK;
                 parent->color = BLACK;
@@ -128,6 +132,8 @@ static void map_node_insert_fixup(Map *map, MapNode *node) {
                 node = gparent;
                 continue;
             } else {
+
+                // Case 2条件：叔叔是黑色，且当前节点是左孩子
                 if (parent->left == node) {
                     map_node_right_rotate(map, parent);
                     MapNode *tmp = parent;
@@ -135,6 +141,7 @@ static void map_node_insert_fixup(Map *map, MapNode *node) {
                     node = tmp;
                 }
 
+                // Case 3条件：叔叔是黑色，且当前节点是右孩子。
                 parent->color = BLACK;
                 gparent->color = RED;
                 map_node_left_rotate(map, gparent);
@@ -150,6 +157,7 @@ static void map_node_delete_fixup(Map *map, MapNode *node, MapNode *parent) {
     while ((!node || node->color == BLACK) && node != map->root) {
         if (parent->left == node) {
             brother = parent->right;
+            // Case 1: 兄弟是红色的
             if (brother->color == RED) {
                 brother->color = BLACK;
                 parent->color = RED;
@@ -158,16 +166,19 @@ static void map_node_delete_fixup(Map *map, MapNode *node, MapNode *parent) {
             }
             if ((!brother->left || brother->left->color == BLACK) &&
                 (!brother->right || brother->right->color == BLACK)) {
+                // Case 2: 兄弟是黑色，且兄弟的俩个孩子也都是黑色的
                 brother->color = RED;
                 node = parent;
                 parent = node->parent;
             } else {
                 if (!brother->right || brother->right->color == BLACK) {
+                    // Case 3: 兄弟是黑色的，并且兄弟的左孩子是红色，右孩子为黑色。
                     brother->left->color = BLACK;
                     brother->color = RED;
                     map_node_right_rotate(map, brother);
                     brother = parent->right;
                 }
+                // Case 4: 兄弟是黑色的；并且兄弟的右孩子是红色的，左孩子任意颜色。
                 brother->color = parent->color;
                 parent->color = BLACK;
                 brother->right->color = BLACK;
@@ -178,6 +189,7 @@ static void map_node_delete_fixup(Map *map, MapNode *node, MapNode *parent) {
         } else {
             brother = parent->left;
             if (brother->color == RED) {
+                // Case 1: 的兄弟是红色的
                 brother->color = BLACK;
                 parent->color = RED;
                 map_node_right_rotate(map, parent);
@@ -185,16 +197,19 @@ static void map_node_delete_fixup(Map *map, MapNode *node, MapNode *parent) {
             }
             if ((!brother->left || brother->left->color == BLACK) &&
                 (!brother->right || brother->right->color == BLACK)) {
+                // Case 2: 兄弟是黑色，且兄弟的俩个孩子也都是黑色的
                 brother->color = RED;
                 node = parent;
                 parent = node->parent;
             } else {
                 if (!brother->left || brother->left->color == BLACK) {
+                    // Case 3: 兄弟是黑色的，并且兄弟的左孩子是红色，右孩子为黑色。
                     brother->right->color = BLACK;
                     brother->color = RED;
                     map_node_left_rotate(map, brother);
                     brother = parent->left;
                 }
+                // Case 4: 兄弟是黑色的；并且兄弟的右孩子是红色的，左孩子任意颜色。
                 brother->color = parent->color;
                 parent->color = BLACK;
                 brother->left->color = BLACK;

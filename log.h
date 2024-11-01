@@ -13,12 +13,12 @@
 #include <pthread.h>
 
 
-#define LOG_FILE_PATH_LEN             (MAX_PATH_LEN + DATE_TIME_LEN)
 #define MAX_LEVEL_LEN                 7
 #define DATE_TIME_LEN                 11
 #define DATE_SEC_TIME_LEN             20
 #define FILE_NAME_AND_LINE_LEN        512
 #define MAX_PATH_LEN                  1024
+#define LOG_FILE_PATH_LEN             (MAX_PATH_LEN + DATE_TIME_LEN)
 
 enum { LOG_NONE, LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
