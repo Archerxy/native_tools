@@ -1,6 +1,15 @@
 #ifndef _ARCHER_TOOL_H_
 #define _ARCHER_TOOL_H_
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+
+#include <ucontext.h>
+#endif
+
+#include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,6 +20,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <pthread.h>
+#include <stdatomic.h>
 
 struct ReentrantLock_st;
 typedef struct ReentrantLock_st ReentrantLock;
@@ -164,6 +174,44 @@ void json_add_string_to_object(JsonVal *object, const char *key, const char *str
 int json_get_int(JsonVal *c);
 double json_get_double(JsonVal *c);
 const char * json_get_string(JsonVal *c);
+
+
+
+
+struct SyncQueue_st;
+typedef struct SyncQueue_st SyncQueue;
+
+SyncQueue * sync_queue_new();
+void sync_queue_in(SyncQueue *queue, void *data);
+void* sync_queue_out(SyncQueue *queue);
+void sync_queue_free(SyncQueue *queue);
+
+
+
+struct AcoScheduler_st;
+typedef struct AcoScheduler_st AcoScheduler;
+
+struct ACoroutine_st;
+typedef struct ACoroutine_st ACoroutine;
+
+typedef void (* acoroutine_func)(AcoScheduler *aschd, void * arg);
+
+typedef enum AcoStatus_st {       
+    ACO_Dead       = 0,       
+    ACO_Ready      = 1,      
+    ACO_Running    = 2,     
+    ACO_Suspend    = 3,     
+} AcoStatus;
+
+
+extern AcoScheduler *aco_scheduler_start(void);
+extern void aco_scheduler_close(AcoScheduler *aschd);
+extern ACoroutine * acoroutine_create(AcoScheduler *aschd, acoroutine_func func, void * arg);
+extern void acoroutine_destroy(ACoroutine *co);
+extern void aco_scheduler_resume(AcoScheduler *aschd, ACoroutine *co);
+extern void aco_scheduler_yield(AcoScheduler *aschd);
+extern AcoStatus acoroutine_status(ACoroutine *co);
+extern int aco_scheduler_running(AcoScheduler *aschd);
 
 #endif
 

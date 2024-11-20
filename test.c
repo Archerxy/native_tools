@@ -2,6 +2,7 @@
 #define __TEST__
 
 #include "archer_tool.h"
+#include "acoroutine.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -195,13 +196,48 @@ void jsonTest() {
     printf("newMsg.msg = %s\n", json_get_string(newMsg));
 }
 
+struct args {
+    int n;
+};
+
+static void aco_func(AcoScheduler * schd, void * ud) {
+    struct args * arg = ud;
+    int start = arg->n;
+    int i;
+    for (i = 0;i<5;i++) {
+        printf("acoroutine %d : %d\n", aco_scheduler_running(schd), start + i);
+        aco_scheduler_yield(schd);
+    }
+}
+
+static void acoTest() {
+    AcoScheduler *schd = aco_scheduler_start();
+    struct args arg1 = { .n = 0 };
+    struct args arg2 = { .n = 100 };
+
+    ACoroutine *co1 = acoroutine_create(schd, aco_func, &arg1);
+    ACoroutine *co2 = acoroutine_create(schd, aco_func, &arg2);
+    printf("aco test start\n");
+    while (acoroutine_status(co1) && acoroutine_status(co2)) {
+        aco_scheduler_resume(schd, co1);
+        aco_scheduler_resume(schd, co2);
+        printf("co1 = %d, co2 = %d\n", acoroutine_status(co1), acoroutine_status(co2));
+    }
+    printf("aco test close\n");
+    acoroutine_destroy(co1);
+    acoroutine_destroy(co2);
+    aco_scheduler_close(schd);
+    printf("aco test end\n");
+}
+
 // gcc *.c -lpthread -o test.exe
 int main() {
     // log_test();
 
     // map_test();
     // reentrantLockTest();
-    jsonTest();
+    // jsonTest();
+    acoTest();
     return 0;
 }
 

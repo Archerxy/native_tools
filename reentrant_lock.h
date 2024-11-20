@@ -1,6 +1,10 @@
 #ifndef _REENTRANT_LOCK_H_
 #define _REENTRANT_LOCK_H_
 
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
+#endif
+
 #include <pthread.h>
 #include <stdlib.h>
 
