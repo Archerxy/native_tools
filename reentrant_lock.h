@@ -15,8 +15,7 @@ typedef struct ReentrantLockNode_st ReentrantLockNode;
 typedef struct ReentrantLock_st ReentrantLock;
 
 
-ReentrantLock * reentrantlock_new();
-ReentrantLock * reentrantlock_fair_new();
+ReentrantLock * reentrantlock_new(int fair);
 void reentrantlock_acquire(ReentrantLock *lock);
 void reentrantlock_release(ReentrantLock *lock);
 void reentrantlock_destroy(ReentrantLock* lock);

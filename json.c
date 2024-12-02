@@ -1110,4 +1110,3 @@ const char * json_get_string(JsonVal *c) {
     }
     return c->valuestring;
 }
-

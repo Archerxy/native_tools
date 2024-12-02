@@ -25,8 +25,7 @@
 struct ReentrantLock_st;
 typedef struct ReentrantLock_st ReentrantLock;
 
-ReentrantLock * reentrantlock_new();
-ReentrantLock * reentrantlock_fair_new();
+ReentrantLock * reentrantlock_new(int fair);
 void reentrantlock_acquire(ReentrantLock *lock);
 void reentrantlock_release(ReentrantLock *lock);
 void reentrantlock_destroy(ReentrantLock* lock);
@@ -118,29 +117,6 @@ size_t map_size(Map *map);
 
 
 
-
-#ifndef json_False
-#define json_False  (1 << 0)
-#endif
-#ifndef json_True
-#define json_True   (1 << 1)
-#endif
-#ifndef json_NULL
-#define json_NULL   (1 << 2)
-#endif
-#ifndef json_Number
-#define json_Number (1 << 3)
-#endif
-#ifndef json_String
-#define json_String (1 << 4)
-#endif
-#ifndef json_Array
-#define json_Array  (1 << 5)
-#endif
-#ifndef json_Object
-#define json_Object (1 << 6)
-#endif
-
 struct JsonVal_st;
 typedef struct JsonVal_st JsonVal;
 
@@ -206,13 +182,13 @@ typedef enum AcoStatus_st {
 
 extern AcoScheduler *aco_scheduler_start(void);
 extern void aco_scheduler_close(AcoScheduler *aschd);
-extern ACoroutine * acoroutine_create(AcoScheduler *aschd, acoroutine_func func, void * arg);
+extern ACoroutine * acoroutine_create(AcoScheduler *aschd, const char *name, acoroutine_func func, void * arg);
 extern void acoroutine_destroy(ACoroutine *co);
 extern void aco_scheduler_resume(AcoScheduler *aschd, ACoroutine *co);
 extern void aco_scheduler_yield(AcoScheduler *aschd);
 extern AcoStatus acoroutine_status(ACoroutine *co);
-extern int aco_scheduler_running(AcoScheduler *aschd);
+extern const char * acoroutine_name(ACoroutine *co);
+extern ACoroutine * aco_scheduler_running(AcoScheduler *manager);
 
 #endif
-
 

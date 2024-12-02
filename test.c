@@ -2,15 +2,8 @@
 #define __TEST__
 
 #include "archer_tool.h"
-#include "acoroutine.h"
-#include <string.h>
 #include <stdio.h>
-
-#define my_put(m,a,b) \
-        { \
-        void *p = (void *)b; \
-        map_put(m,a,p); \
-        } \
+#include <stdint.h>
 
 
 void log_test() {
@@ -133,7 +126,7 @@ void *threadFunc3(void *arg) {
 }
 
 void reentrantLockTest() {
-    ReentrantLock *fair_lock = reentrantlock_new();
+    ReentrantLock *fair_lock = reentrantlock_new(1);
     pthread_t t0, t1, t2, t3;
     pthread_create(&t0, NULL, threadFunc0, fair_lock);
     pthread_create(&t1, NULL, threadFunc1, fair_lock);
@@ -196,6 +189,60 @@ void jsonTest() {
     printf("newMsg.msg = %s\n", json_get_string(newMsg));
 }
 
+
+
+typedef struct {
+    SyncQueue *queue;
+    uint64_t   n;
+} Wrap;
+
+void *thread_func(void *arg) {
+    Wrap *w = arg;
+    for(int i = 0; i < 50; i++) {
+        sync_queue_in(w->queue, &(w->n));
+    }
+}
+
+static void queueTest() {
+    SyncQueue *queue = sync_queue_new();
+
+    pthread_t t[10];
+    uint64_t c = 0;
+    Wrap w[10];
+    for(int i = 0; i < 10; i++) {
+        w[i].queue = queue;  
+        w[i].n = i + c * 2;
+        pthread_create(&(t[i]), NULL, thread_func, &(w[i]));
+        c++;
+    }
+
+
+    for(int i = 0 ; i < 10; i++) {
+        pthread_join((t[i]), NULL);
+    }
+
+    printf("start sync_queue_out\n");
+
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+    printf("Dequeued: %llu\n", *(uint64_t *)sync_queue_out(queue));
+
+    sync_queue_free(queue);
+}
+
 struct args {
     int n;
 };
@@ -205,7 +252,7 @@ static void aco_func(AcoScheduler * schd, void * ud) {
     int start = arg->n;
     int i;
     for (i = 0;i<5;i++) {
-        printf("acoroutine %d : %d\n", aco_scheduler_running(schd), start + i);
+        printf("acoroutine %s : %d\n", acoroutine_name(aco_scheduler_running(schd)) , start + i);
         aco_scheduler_yield(schd);
     }
 }
@@ -215,8 +262,8 @@ static void acoTest() {
     struct args arg1 = { .n = 0 };
     struct args arg2 = { .n = 100 };
 
-    ACoroutine *co1 = acoroutine_create(schd, aco_func, &arg1);
-    ACoroutine *co2 = acoroutine_create(schd, aco_func, &arg2);
+    ACoroutine *co1 = acoroutine_create(schd, "aco1", aco_func, &arg1);
+    ACoroutine *co2 = acoroutine_create(schd, "aco2", aco_func, &arg2);
     printf("aco test start\n");
     while (acoroutine_status(co1) && acoroutine_status(co2)) {
         aco_scheduler_resume(schd, co1);

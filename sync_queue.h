@@ -15,4 +15,3 @@ void* sync_queue_out(SyncQueue *queue);
 void sync_queue_free(SyncQueue *queue);
 
 #endif
-

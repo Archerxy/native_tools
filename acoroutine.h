@@ -39,11 +39,12 @@ typedef enum AcoStatus_st {
 
 extern AcoScheduler *aco_scheduler_start(void);
 extern void aco_scheduler_close(AcoScheduler *aschd);
-extern ACoroutine * acoroutine_create(AcoScheduler *aschd, acoroutine_func func, void * arg);
+extern ACoroutine * acoroutine_create(AcoScheduler *aschd, const char *name, acoroutine_func func, void * arg);
 extern void acoroutine_destroy(ACoroutine *co);
 extern void aco_scheduler_resume(AcoScheduler *aschd, ACoroutine *co);
 extern void aco_scheduler_yield(AcoScheduler *aschd);
 extern AcoStatus acoroutine_status(ACoroutine *co);
-extern int aco_scheduler_running(AcoScheduler *aschd);
+extern const char * acoroutine_name(ACoroutine *co);
+extern ACoroutine * aco_scheduler_running(AcoScheduler *manager);
 
 #endif 

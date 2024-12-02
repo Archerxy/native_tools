@@ -70,4 +70,3 @@ double json_get_double(JsonVal *c);
 const char * json_get_string(JsonVal *c);
 
 #endif
-

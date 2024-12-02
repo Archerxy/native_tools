@@ -1,5 +1,4 @@
 #include "reentrant_lock.h"
-#include <stdio.h>
 
 typedef struct ReentrantLockNode_st {
     struct ReentrantLockNode_st* next;
@@ -13,25 +12,11 @@ typedef struct ReentrantLock_st {
     int                   fair_lock;
 } ReentrantLock;
 
-ReentrantLock * reentrantlock_new() {
+ReentrantLock * reentrantlock_new(int fair) {
     ReentrantLock* lock = (ReentrantLock *)malloc(sizeof(ReentrantLock));
     lock->queue_head = NULL;
     lock->queue_tail = NULL;
-    lock->fair_lock = 0;
-
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-    pthread_mutex_init(&lock->mutex, &attr);
-    pthread_cond_init(&lock->cond, NULL);
-    return lock;
-}
-
-ReentrantLock * reentrantlock_fair_new() {
-    ReentrantLock* lock = (ReentrantLock *)malloc(sizeof(ReentrantLock));
-    lock->queue_head = NULL;
-    lock->queue_tail = NULL;
-    lock->fair_lock = 1;
+    lock->fair_lock = fair;
 
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
@@ -42,7 +27,6 @@ ReentrantLock * reentrantlock_fair_new() {
 }
 
 void reentrantlock_acquire(ReentrantLock *lock) { 
-    printf("acquire tid = %ld\n", pthread_self());
     if(!lock->fair_lock) {
         pthread_mutex_lock(&lock->mutex);
         return ; 
